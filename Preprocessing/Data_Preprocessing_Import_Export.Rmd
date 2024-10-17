@@ -1,0 +1,976 @@
+---
+title: "Data Cleaning"
+author: "Rushi Kanjaria"
+date: "2023-07-29"
+output: html_document
+---
+
+
+```{R}
+# Function to check if package is installed
+
+required_packages <- c("tidyverse", "here", "rJava", "XLConnect", "dplyr", "janitor","stringr")
+
+check_install_load <- function(packages) {
+  for (package in packages) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package, dependencies = TRUE)
+      library(package, character.only = TRUE)
+    }
+  }
+}
+
+check_install_load(required_packages)
+```
+
+```{R}
+#Dataframe
+import_export <- loadWorkbook(here("Raw_Data", "IE_Crude.xlsx"))
+
+#All Years
+df_import_year <- readWorksheet(import_export, sheet = "PT_IMPORT_H", startRow = 9, endRow = 21, header = FALSE)
+df_import_year <- df_import_year[complete.cases(df_import_year),]
+
+df_export_year <- readWorksheet(import_export, sheet = "PT_IMPORT_H", startRow = 25, endRow = 36, header = FALSE)
+df_export_year <- df_export_year[complete.cases(df_export_year),]
+
+#2011
+df_import_2011 <- readWorksheet(import_export, sheet = "PT_import_H_2011-12", startRow = 10, endRow = 22, header = FALSE)
+df_import_2011 <- df_import_2011[complete.cases(df_import_2011),]
+
+df_export_2011 <- readWorksheet(import_export, sheet = "PT_import_H_2011-12", startRow = 25, endRow = 36, header = FALSE)
+df_export_2011 <- df_export_2011[complete.cases(df_export_2011),]
+
+#2012
+df_import_2012 <- readWorksheet(import_export, sheet = "PT_import_H_2012-13", startRow = 10, endRow = 22, header = FALSE)
+df_import_2012 <- df_import_2012[complete.cases(df_import_2012),]
+
+df_export_2012 <- readWorksheet(import_export, sheet = "PT_import_H_2012-13", startRow = 25, endRow = 36, header = FALSE)
+df_export_2012 <- df_export_2012[complete.cases(df_export_2012),]
+
+#2013
+df_import_2013 <- readWorksheet(import_export, sheet = "PT_import_H_2013-14", startRow = 10, endRow = 22, header = FALSE)
+df_import_2013 <- df_import_2013[complete.cases(df_import_2013),]
+
+df_export_2013 <- readWorksheet(import_export, sheet = "PT_import_H_2013-14", startRow = 25, endRow = 36, header = FALSE)
+df_export_2013 <- df_export_2013[complete.cases(df_export_2013),]
+
+#2014
+df_import_2014 <- readWorksheet(import_export, sheet = "PT_import_H_2014-15", startRow = 9, endRow = 21, header = FALSE)
+df_import_2014 <- df_import_2014[complete.cases(df_import_2014),]
+
+df_export_2014 <- readWorksheet(import_export, sheet = "PT_import_H_2014-15", startRow = 24, endRow = 35, header = FALSE)
+df_export_2014 <- df_export_2014[complete.cases(df_export_2014),]
+
+#2015
+df_import_2015 <- readWorksheet(import_export, sheet = "PT_IMPORT_H_2015-16", startRow = 9, endRow = 21, header = FALSE)
+df_import_2015 <- df_import_2015[complete.cases(df_import_2015),]
+
+df_export_2015 <- readWorksheet(import_export, sheet = "PT_IMPORT_H_2015-16", startRow = 24, endRow = 35, header = FALSE)
+df_export_2015 <- df_export_2015[complete.cases(df_export_2015),]
+
+#2016
+df_import_2016 <- readWorksheet(import_export, sheet = "PT_IMPORT_2016-17", startRow = 9, endRow = 21, header = FALSE)
+df_import_2016 <- df_import_2016[complete.cases(df_import_2016),]
+
+df_export_2016 <- readWorksheet(import_export, sheet = "PT_IMPORT_2016-17", startRow = 24, endRow = 35, header = FALSE)
+df_export_2016 <- df_export_2016[complete.cases(df_export_2016),]
+
+#2017
+df_import_2017 <- readWorksheet(import_export, sheet = "PT_IMPORT_2017-18", startRow = 9, endRow = 21, header = FALSE)
+df_import_2017 <- df_import_2017[complete.cases(df_import_2017),]
+
+df_export_2017 <- readWorksheet(import_export, sheet = "PT_IMPORT_2017-18", startRow = 24, endRow = 35, header = FALSE)
+df_export_2017 <- df_export_2017[complete.cases(df_export_2017),]
+
+#2018
+df_import_2018 <- readWorksheet(import_export, sheet = "PT_IMPORT_2018-19", startRow = 10, endRow = 22, header = FALSE)
+df_import_2018 <- df_import_2018[complete.cases(df_import_2018),]
+
+df_export_2018 <- readWorksheet(import_export, sheet = "PT_IMPORT_2018-19", startRow = 25, endRow = 36, header = FALSE)
+df_export_2018 <- df_export_2018[complete.cases(df_export_2018),]
+
+#2019
+df_import_2019 <- readWorksheet(import_export, sheet = "PT_IMPORT_2019-20", startRow = 10, endRow = 22, header = FALSE)
+df_import_2019 <- df_import_2019[complete.cases(df_import_2019),]
+
+df_export_2019 <- readWorksheet(import_export, sheet = "PT_IMPORT_2019-20", startRow = 25, endRow = 36, header = FALSE)
+df_export_2019 <- df_export_2019[complete.cases(df_export_2019),]
+
+#2020
+df_import_2020 <- readWorksheet(import_export, sheet = "PT_IMPORT_2020-21", startRow = 10, endRow = 23, header = FALSE)
+df_import_2020 <- df_import_2020[complete.cases(df_import_2020),]
+
+df_export_2020 <- readWorksheet(import_export, sheet = "PT_IMPORT_2020-21", startRow = 26, endRow = 38, header = FALSE)
+df_export_2020 <- df_export_2020[complete.cases(df_export_2020),]
+
+#2021
+df_import_2021 <- readWorksheet(import_export, sheet = "PT_IMPORT_2021-22", startRow = 10, endRow = 23, header = FALSE)
+df_import_2021 <- df_import_2021[complete.cases(df_import_2021),]
+
+df_export_2021 <- readWorksheet(import_export, sheet = "PT_IMPORT_2021-22", startRow = 26, endRow = 38, header = FALSE)
+df_export_2021 <- df_export_2021[complete.cases(df_export_2021),]
+
+#2022
+df_import_2022 <- readWorksheet(import_export, sheet = "PT_IMPORT_2022-23", startRow = 10, endRow = 23, header = FALSE)
+df_import_2022 <- df_import_2022[complete.cases(df_import_2022),]
+
+df_export_2022 <- readWorksheet(import_export, sheet = "PT_IMPORT_2022-23", startRow = 26, endRow = 38, header = FALSE)
+df_export_2022 <- df_export_2022[complete.cases(df_export_2022),]
+```
+
+```{R}
+#Adding column names
+
+#All Years
+colnames(df_import_year) <- c("Products","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022")
+
+colnames(df_export_year) <- c("Products","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022")
+
+#2011
+colnames(df_import_2011) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2011) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2012
+colnames(df_import_2012) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2012) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2013
+colnames(df_import_2013) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2013) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2014
+colnames(df_import_2014) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2014) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2015
+colnames(df_import_2015) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2015) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2016
+colnames(df_import_2016) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2016) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2017
+colnames(df_import_2017) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2017) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2018
+colnames(df_import_2018) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2018) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2019
+colnames(df_import_2019) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2019) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2020
+colnames(df_import_2020) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2020) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2021
+colnames(df_import_2021) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2021) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+#2022
+colnames(df_import_2022) <- c("Products","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+
+colnames(df_export_2022) <- c("Products", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Total")
+```
+
+```{R}
+#Roundoff values
+
+#All Years
+df_import_year <- df_import_year %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_year <- df_export_year %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2011
+df_import_2011 <- df_import_2011 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2011 <- df_export_2011 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2012
+df_import_2012 <- df_import_2012 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2012 <- df_export_2012 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2013
+df_import_2013 <- df_import_2013 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2013 <- df_export_2013 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2014
+df_import_2014 <- df_import_2014 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2014 <- df_export_2014 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2015
+df_import_2015 <- df_import_2015 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2015 <- df_export_2015 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2016
+df_import_2016 <- df_import_2016 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2016 <- df_export_2016 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2017
+df_import_2017 <- df_import_2017 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2017 <- df_export_2017 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2018
+df_import_2018 <- df_import_2018 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2018 <- df_export_2018 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2019
+df_import_2019 <- df_import_2019 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2019 <- df_export_2019 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2020
+df_import_2020 <- df_import_2020 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2020 <- df_export_2020 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2021
+df_import_2021 <- df_import_2021 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2021 <- df_export_2021 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#2022
+df_import_2022 <- df_import_2022 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+df_export_2022 <- df_export_2022 %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+```
+
+```{R}
+#Removing the column Total from the dataframe
+
+#2011
+df_import_2011 <- select(df_import_2011, -Total)
+df_export_2011 <- select(df_export_2011, -Total)
+
+#2012
+df_import_2012 <- select(df_import_2012, -Total)
+df_export_2012 <- select(df_export_2012, -Total)
+
+#2013
+df_import_2013 <- select(df_import_2013, -Total)
+df_export_2013 <- select(df_export_2013, -Total)
+
+#2014
+df_import_2014 <- select(df_import_2014, -Total)
+df_export_2014 <- select(df_export_2014, -Total)
+
+#2015
+df_import_2015 <- select(df_import_2015, -Total)
+df_export_2015 <- select(df_export_2015, -Total)
+
+#2016
+df_import_2016 <- select(df_import_2016, -Total)
+df_export_2016 <- select(df_export_2016, -Total)
+
+#2017
+df_import_2017 <- select(df_import_2017, -Total)
+df_export_2017 <- select(df_export_2017, -Total)
+
+#2018
+df_import_2018 <- select(df_import_2018, -Total)
+df_export_2018 <- select(df_export_2018, -Total)
+
+#2019
+df_import_2019 <- select(df_import_2019, -Total)
+df_export_2019 <- select(df_export_2019, -Total)
+
+#2020
+df_import_2020 <- select(df_import_2020, -Total)
+df_export_2020 <- select(df_export_2020, -Total)
+
+#2021
+df_import_2021 <- select(df_import_2021, -Total)
+df_export_2021 <- select(df_export_2021, -Total)
+
+#2022
+df_import_2022 <- select(df_import_2022, -Total)
+df_export_2022 <- select(df_export_2022, -Total)
+```
+
+```{R}
+#Transforming the datafram, columnames to rows
+
+#All years
+import_product_names <- df_import_year$Products
+import_product_names <- append(import_product_names, "Year", after=0)
+
+export_product_names <- df_export_year$Products
+export_product_names <- append(export_product_names, "Year", after=0)
+
+temp1 <- data.frame(t(df_import_year[-1]))
+colnames(temp1) <- df_import_year[,1]
+temp1$"Year" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_year <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_year[-1]))
+colnames(temp1) <- df_export_year[,1]
+temp1$"Year" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_year <- temp1[export_product_names]
+
+df_import_year <- df_import_year %>%
+  clean_names()
+
+df_export_year <- df_export_year %>%
+  clean_names()
+
+#2011
+import_product_names <- df_import_2011$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2011$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2011[-1]))
+colnames(temp1) <- df_import_2011[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2011 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2011[-1]))
+colnames(temp1) <- df_export_2011[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2011 <- temp1[export_product_names]
+
+df_import_2011 <- df_import_2011 %>%
+  clean_names()
+
+df_export_2011 <- df_export_2011 %>%
+  clean_names()
+
+#2012
+import_product_names <- df_import_2012$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2012$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2012[-1]))
+colnames(temp1) <- df_import_2012[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2012 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2012[-1]))
+colnames(temp1) <- df_export_2012[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2012 <- temp1[export_product_names]
+
+df_import_2012 <- df_import_2012 %>%
+  clean_names()
+
+df_export_2012 <- df_export_2012 %>%
+  clean_names()
+
+#2013
+import_product_names <- df_import_2013$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2013$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2013[-1]))
+colnames(temp1) <- df_import_2013[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2013 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2013[-1]))
+colnames(temp1) <- df_export_2013[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2013 <- temp1[export_product_names]
+
+df_import_2013 <- df_import_2013 %>%
+  clean_names()
+
+df_export_2013 <- df_export_2013 %>%
+  clean_names()
+
+#2014
+import_product_names <- df_import_2014$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2014$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2014[-1]))
+colnames(temp1) <- df_import_2014[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2014 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2014[-1]))
+colnames(temp1) <- df_export_2014[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2014 <- temp1[export_product_names]
+
+df_import_2014 <- df_import_2014 %>%
+  clean_names()
+
+df_export_2014 <- df_export_2014 %>%
+  clean_names()
+
+#2015
+import_product_names <- df_import_2015$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2015$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2015[-1]))
+colnames(temp1) <- df_import_2015[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2015 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2015[-1]))
+colnames(temp1) <- df_export_2015[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2015 <- temp1[export_product_names]
+
+df_import_2015 <- df_import_2015 %>%
+  clean_names()
+
+df_export_2015 <- df_export_2015 %>%
+  clean_names()
+
+#2016
+import_product_names <- df_import_2016$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2016$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2016[-1]))
+colnames(temp1) <- df_import_2016[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2016 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2016[-1]))
+colnames(temp1) <- df_export_2016[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2016 <- temp1[export_product_names]
+
+df_import_2016 <- df_import_2016 %>%
+  clean_names()
+
+df_export_2016 <- df_export_2016 %>%
+  clean_names()
+
+#2017
+import_product_names <- df_import_2017$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2017$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2017[-1]))
+colnames(temp1) <- df_import_2017[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2017 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2017[-1]))
+colnames(temp1) <- df_export_2017[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2017 <- temp1[export_product_names]
+
+df_import_2017 <- df_import_2017 %>%
+  clean_names()
+
+df_export_2017 <- df_export_2017 %>%
+  clean_names()
+
+#2018
+import_product_names <- df_import_2018$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2018$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2018[-1]))
+colnames(temp1) <- df_import_2018[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2018 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2018[-1]))
+colnames(temp1) <- df_export_2018[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2018 <- temp1[export_product_names]
+
+df_import_2018 <- df_import_2018 %>%
+  clean_names()
+
+df_export_2018 <- df_export_2018 %>%
+  clean_names()
+
+#2019
+import_product_names <- df_import_2019$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2019$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2019[-1]))
+colnames(temp1) <- df_import_2019[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2019 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2019[-1]))
+colnames(temp1) <- df_export_2019[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2019 <- temp1[export_product_names]
+
+df_import_2019 <- df_import_2019 %>%
+  clean_names()
+
+df_export_2019 <- df_export_2019 %>%
+  clean_names()
+
+#2020
+import_product_names <- df_import_2020$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2020$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2020[-1]))
+colnames(temp1) <- df_import_2020[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2020 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2020[-1]))
+colnames(temp1) <- df_export_2020[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2020 <- temp1[export_product_names]
+
+df_import_2020 <- df_import_2020 %>%
+  clean_names()
+
+df_export_2020 <- df_export_2020 %>%
+  clean_names()
+
+#2021
+import_product_names <- df_import_2021$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2021$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2021[-1]))
+colnames(temp1) <- df_import_2021[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2021 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2021[-1]))
+colnames(temp1) <- df_export_2021[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2021 <- temp1[export_product_names]
+
+df_import_2021 <- df_import_2021 %>%
+  clean_names()
+
+df_export_2021 <- df_export_2021 %>%
+  clean_names()
+
+#2022
+import_product_names <- df_import_2022$Products
+import_product_names <- append(import_product_names, "Months", after=0)
+
+export_product_names <- df_export_2022$Products
+export_product_names <- append(export_product_names, "Months", after=0)
+
+temp1 <- data.frame(t(df_import_2022[-1]))
+colnames(temp1) <- df_import_2022[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_import_2022 <- temp1[import_product_names]
+
+temp1 <- data.frame(t(df_export_2022[-1]))
+colnames(temp1) <- df_export_2022[,1]
+temp1$"Months" <- row.names(temp1)
+rownames(temp1) <- NULL
+df_export_2022 <- temp1[export_product_names]
+
+df_import_2022 <- df_import_2022 %>%
+  clean_names()
+
+df_export_2022 <- df_export_2022 %>%
+  clean_names()
+```
+
+```{R}
+#Performing row summation and adding type (import/export)
+
+#All Years
+df_import_year$"total" <- rowSums(df_import_year[-1])
+df_import_year <- df_import_year %>%
+  mutate(import_export = "import")
+
+df_export_year$"total" <- rowSums(df_export_year[-1])
+df_export_year <- df_export_year %>%
+  mutate(import_export = "export") %>%
+  rename("atf" = "atf_number",
+         "others" = "others_percent")
+
+#2011
+df_import_2011 <- df_import_2011 %>%
+  mutate(year = 2011)
+
+df_export_2011 <- df_export_2011 %>%
+  mutate(year = 2011)
+  
+df_import_2011$"net_import" <- rowSums(df_import_2011[-1]) - 2011
+df_export_2011$"net_export" <- rowSums(df_export_2011[-1]) - 2011
+
+#2012
+df_import_2012 <- df_import_2012 %>%
+  mutate(year = 2012)
+
+df_export_2012 <- df_export_2012 %>%
+  mutate(year = 2012)
+  
+df_import_2012$"net_import" <- rowSums(df_import_2012[-1]) - 2012
+df_export_2012$"net_export" <- rowSums(df_export_2012[-1]) - 2012
+
+#2013
+df_import_2013 <- df_import_2013 %>%
+  mutate(year = 2013)
+
+df_export_2013 <- df_export_2013 %>%
+  mutate(year = 2013)
+  
+df_import_2013$"net_import" <- rowSums(df_import_2013[-1]) - 2013
+df_export_2013$"net_export" <- rowSums(df_export_2013[-1]) - 2013
+
+#2014
+df_import_2014 <- df_import_2014 %>%
+  mutate(year = 2014)
+
+df_export_2014 <- df_export_2014 %>%
+  mutate(year = 2014)
+  
+df_import_2014$"net_import" <- rowSums(df_import_2014[-1]) - 2014
+df_export_2014$"net_export" <- rowSums(df_export_2014[-1]) - 2014
+
+#2015
+df_import_2015 <- df_import_2015 %>%
+  mutate(year = 2015)
+
+df_export_2015 <- df_export_2015 %>%
+  mutate(year = 2015)
+  
+df_import_2015$"net_import" <- rowSums(df_import_2015[-1]) - 2015
+df_export_2015$"net_export" <- rowSums(df_export_2015[-1]) - 2015
+
+#2016
+df_import_2016 <- df_import_2016 %>%
+  mutate(year = 2016)
+
+df_export_2016 <- df_export_2016 %>%
+  mutate(year = 2016)
+  
+df_import_2016$"net_import" <- rowSums(df_import_2016[-1]) - 2016
+df_export_2016$"net_export" <- rowSums(df_export_2016[-1]) - 2016
+
+#2017
+df_import_2017 <- df_import_2017 %>%
+  mutate(year = 2017)
+
+df_export_2017 <- df_export_2017 %>%
+  mutate(year = 2017)
+  
+df_import_2017$"net_import" <- rowSums(df_import_2017[-1]) - 2017
+df_export_2017$"net_export" <- rowSums(df_export_2017[-1]) - 2017
+
+#2018
+df_import_2018 <- df_import_2018 %>%
+  mutate(year = 2018)
+
+df_export_2018 <- df_export_2018 %>%
+  mutate(year = 2018)
+  
+df_import_2018$"net_import" <- rowSums(df_import_2018[-1]) - 2018
+df_export_2018$"net_export" <- rowSums(df_export_2018[-1]) - 2018
+
+#2019
+df_import_2019 <- df_import_2019 %>%
+  mutate(year = 2019)
+
+df_export_2019 <- df_export_2019 %>%
+  mutate(year = 2019)
+  
+df_import_2019$"net_import" <- rowSums(df_import_2019[-1]) - 2019
+df_export_2019$"net_export" <- rowSums(df_export_2019[-1]) - 2019
+
+#2020
+df_import_2020 <- df_import_2020 %>%
+  mutate(year = 2020)
+
+df_export_2020 <- df_export_2020 %>%
+  mutate(year = 2020)
+  
+df_import_2020$"net_import" <- rowSums(df_import_2020[-1]) - 2020
+df_export_2020$"net_export" <- rowSums(df_export_2020[-1]) - 2020
+
+#2021
+df_import_2021 <- df_import_2021 %>%
+  mutate(year = 2021)
+
+df_export_2021 <- df_export_2021 %>%
+  mutate(year = 2021)
+  
+df_import_2021$"net_import" <- rowSums(df_import_2021[-1]) - 2021
+df_export_2021$"net_export" <- rowSums(df_export_2021[-1]) - 2021
+
+#2022
+df_import_2022 <- df_import_2022 %>%
+  mutate(year = 2022)
+
+df_export_2022 <- df_export_2022 %>%
+  mutate(year = 2022)
+  
+df_import_2022$"net_import" <- rowSums(df_import_2022[-1]) - 2022
+df_export_2022$"net_export" <- rowSums(df_export_2022[-1]) - 2022
+```
+
+```{R}
+#adding type (import/export)
+#2011
+df_import_2011 <- df_import_2011 %>%
+  mutate(import_export = "import")
+
+df_export_2011 <- df_export_2011 %>%
+  mutate(import_export = "export")
+
+#2012
+df_import_2012 <- df_import_2012 %>%
+  mutate(import_export = "import")
+
+df_export_2012 <- df_export_2012 %>%
+  mutate(import_export = "export")
+
+#2013
+df_import_2013 <- df_import_2013 %>%
+  mutate(import_export = "import")
+
+df_export_2013 <- df_export_2013 %>%
+  mutate(import_export = "export")
+
+#2014
+df_import_2014 <- df_import_2014 %>%
+  mutate(import_export = "import")
+
+df_export_2014 <- df_export_2014 %>%
+  mutate(import_export = "export")
+
+#2015
+df_import_2015 <- df_import_2015 %>%
+  mutate(import_export = "import")
+
+df_export_2015 <- df_export_2015 %>%
+  mutate(import_export = "export")
+
+#2016
+df_import_2016 <- df_import_2016 %>%
+  mutate(import_export = "import")
+
+df_export_2016 <- df_export_2016 %>%
+  mutate(import_export = "export")
+
+#2017
+df_import_2017 <- df_import_2017 %>%
+  mutate(import_export = "import")
+
+df_export_2017 <- df_export_2017 %>%
+  mutate(import_export = "export")
+
+#2018
+df_import_2018 <- df_import_2018 %>%
+  mutate(import_export = "import")
+
+df_export_2018 <- df_export_2018 %>%
+  mutate(import_export = "export")
+
+#2019
+df_import_2019 <- df_import_2019 %>%
+  mutate(import_export = "import")
+
+df_export_2019 <- df_export_2019 %>%
+  mutate(import_export = "export")
+
+#2020
+df_import_2020 <- df_import_2020 %>%
+  mutate(import_export = "import")
+
+df_export_2020 <- df_export_2020 %>%
+  mutate(import_export = "export")
+
+#2021
+df_import_2021 <- df_import_2021 %>%
+  mutate(import_export = "import")
+
+df_export_2021 <- df_export_2021 %>%
+  mutate(import_export = "export")
+
+#2022
+df_import_2022 <- df_import_2022 %>%
+  mutate(import_export = "import")
+
+df_export_2022 <- df_export_2022 %>%
+  mutate(import_export = "export")
+```
+
+
+```{R}
+#typecasting
+df_import_year$year <- as.numeric(df_import_year$year)
+df_export_year$year <- as.numeric(df_export_year$year)
+```
+
+
+```{R}
+#Merging the dataframes
+
+#Import Export Years
+df_import_export_list <- list(df_import_year, df_export_year)
+df_import_export_years <- bind_rows(df_import_export_list)
+
+#Import Months
+df_import_list <- list(df_import_2011, df_import_2012, df_import_2013, df_import_2014, df_import_2015, df_import_2016, df_import_2017, df_import_2018, df_import_2019, df_import_2020, df_import_2021, df_import_2022)
+
+df_import_months <- bind_rows(df_import_list)
+
+#Export Months
+df_export_list <- list(df_export_2011, df_export_2012, df_export_2013, df_export_2014, df_export_2015, df_export_2016, df_export_2017, df_export_2018, df_export_2019, df_export_2020, df_export_2021, df_export_2022)
+
+df_export_months <- bind_rows(df_export_list)
+```
+
+```{R}
+#Rearranging the columns
+df_import_export_years <- df_import_export_years[, c(1,14,2,3,4,5,6,7,8,15,9,10,11,12,13)]
+df_import_months <- df_import_months[, c(13,1,15,2,3,4,5,6,7,8,9,10,11,16,12,14)]
+df_export_months <- df_export_months[, c(13,1,15,2,3,4,5,6,7,8,9,10,11,17,12,16,14)]
+```
+
+```{R}
+#Combining and renaming the columns
+df_export_months <- df_export_months %>%
+  unite("others", others:others_percent, remove = TRUE, na.rm = TRUE) %>%
+  rename("atf" = "atf_number",
+         "petcoke" = "petcoke_cbfs",
+         "total"  = "net_export")
+
+df_import_months <- df_import_months %>%
+  rename("total" = "net_import")
+```
+
+```{R}
+#replacing null values with 0
+
+#Import Export Years
+df_import_export_years <- df_import_export_years %>%
+  replace(is.na(.),0)
+
+#Import
+df_import_months <- df_import_months %>%
+  replace(is.na(.), 0)
+
+#Export
+df_export_months$others <- as.numeric(df_export_months$others)
+df_export_months <- df_export_months %>%
+  replace(is.na(.), 0)
+```
+
+```{R}
+#Merging the dataframe
+df_import_export_list <- list(df_import_months, df_export_months)
+df_import_export_months <- bind_rows(df_import_export_list)
+```
+
+
+```{R}
+#Rearranging the columns
+df_import_export_months <- df_import_export_months[, c(1,2,3,4,5,6,7,8,9,10,17,11,12,13,14,15,16)]
+```
+
+```{R}
+#Replacing null values with 0
+#Import Export Years
+df_import_export_months <- df_import_export_months %>%
+  replace(is.na(.),0)
+```
+
+
+```{R}
+#Exporting the final dataframes into local system
+write.csv(df_import_export_years, file = here("Data", "import_export_years.csv"), row.names = FALSE)
+write.csv(df_import_export_months, file = here("Data", "import_export_months.csv"), row.names = FALSE)
+```
+

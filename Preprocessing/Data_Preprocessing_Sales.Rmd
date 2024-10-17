@@ -1,0 +1,96 @@
+---
+title: "Statewise_Wrangling"
+author: "Rushi Kanjaria"
+date: "2023-07-30"
+output: html_document
+---
+
+```{R}
+# Function to check if package is installed
+
+required_packages <- c("tidyverse", "here", "rJava", "XLConnect", "dplyr", "janitor","stringr")
+
+check_install_load <- function(packages) {
+  for (package in packages) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package, dependencies = TRUE)
+      library(package, character.only = TRUE)
+    }
+  }
+}
+
+check_install_load(required_packages)
+```
+
+```{R}
+#Dataset
+statewise_sales <- loadWorkbook(here("Raw_Data", "PT_Statewise_Sales.xlsx"))
+
+#MS Sales
+df_ms_sales <- readWorksheet(statewise_sales, sheet = "PT_Cons_Statewise MS", startRow = 9, endRow = 54, header = FALSE)
+
+#HSD Sales
+df_hsd_sales <- readWorksheet(statewise_sales, sheet = "PT_Cons_Statewise HSD", startRow = 9, endRow = 54, header = FALSE)
+```
+
+```{R}
+#MS Sales Column Names
+colnames(df_ms_sales) <- c("States","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022")
+
+#HSD Sales Column Names
+colnames(df_hsd_sales) <- c("States","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022")
+```
+
+```{R}
+#MS Sales roundoff values
+df_ms_sales <- df_ms_sales %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+
+#HSD Sales roundoff values
+df_hsd_sales <- df_hsd_sales %>% 
+  mutate(across(where(is.numeric), ~round(.,digits = 0)))
+```
+
+```{R}
+#MS Sales converting values to lower case
+df_ms_sales$States <- str_to_lower(df_ms_sales$States)
+
+#HSD Sales converting values to lower case
+df_hsd_sales$States <- str_to_lower(df_hsd_sales$States)
+```
+
+```{R}
+#MS Sales replacing Null values with 0
+df_ms_sales <- df_ms_sales %>%
+  replace(is.na(.),0)
+
+#HSD Sales replacing Null values with 0
+df_hsd_sales <- df_hsd_sales %>%
+  replace(is.na(.),0)
+```
+
+```{R}
+#MS Sales removing unwanted rows
+row.names(df_ms_sales[df_ms_sales$States == "region total",])
+df_ms_sales <- df_ms_sales[!(row.names(df_ms_sales) %in% c("12","22","29","37","46")),]
+```
+
+```{R}
+#HSD Sales Removing unwanted rows
+row.names(df_hsd_sales[df_hsd_sales$States == "region total",])
+df_hsd_sales <- df_hsd_sales[!(row.names(df_hsd_sales) %in% c("12","22","29","37","46")),]
+```
+
+```{R}
+#MS Sales filtering out rows with sum greater than 0
+df_ms_sales <- df_ms_sales %>%  filter(rowSums(df_ms_sales[-1]) > 0)
+
+#HSD Sales filtering out rows with sum greater than 0
+df_hsd_sales <- df_hsd_sales %>%  filter(rowSums(df_hsd_sales[-1]) > 0)
+```
+
+```{R}
+#Exporting the final dataframes into local system
+write.csv(df_ms_sales, file = here("Data", "MS_Sales.csv"), row.names = FALSE)
+write.csv(df_hsd_sales, file = here("Data", "HSD_Sales.csv"), row.names = FALSE)
+```

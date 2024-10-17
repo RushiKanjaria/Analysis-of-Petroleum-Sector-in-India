@@ -1,0 +1,250 @@
+---
+title: "Petro plot"
+author: "Rushi Kanjaria"
+date: "2023-07-18"
+output: html_document
+---
+
+```{R}
+library(ggplot2)
+library(gganimate)
+library(tidyverse)
+library(here)
+library(gifski)
+library(forcats)
+library(animation)
+library(plotly)
+library(highcharter)
+library(dplyr)
+library(ggplot2)
+library(RColorBrewer)
+library(ggmap)
+library(maps)
+library(rgdal)
+library(scales)
+library(maptools)
+library(gridExtra)
+library(rgeos)
+library(stringr)
+library(shiny)
+library(ggthemes)
+library(shinydashboard)
+library(shinydashboardPlus)
+library(leaflet)
+library(sf)
+```
+
+```{R}
+df <- read.csv(here("Data", "import_export_years.csv"))
+
+head(df)
+```
+
+```{R}
+# Split the data into import and export
+import_data <- subset(df, import_export == 'import')
+export_data <- subset(df, import_export == 'export')
+
+# Calculate total import excluding crude oil
+import_data_no_crude <- import_data
+import_data_no_crude$total <- import_data_no_crude$total - import_data_no_crude$crude_oil
+import_data_no_crude <- subset(import_data_no_crude, select = -crude_oil)
+```
+
+```{R, fig.dim = c(12,6)}
+plt <- ggplot() +
+  geom_line(data = import_data, aes(x = year, y = total, color = 'Import (Including Crude Oil)', linetype = 'Import (Including Crude Oil)')) +
+  geom_point(data = import_data, aes(x = year, y = total)) +
+  geom_line(data = import_data_no_crude, aes(x = year, y = total, color = 'Import (Excluding Crude Oil)', linetype = 'Import (Excluding Crude Oil)')) +
+  geom_point(data = import_data_no_crude, aes(x = year, y = total)) +
+  geom_line(data = export_data, aes(x = year, y = total, color = 'Export', linetype = 'Export')) +
+  geom_point(data = export_data, aes(x = year, y = total)) +
+  scale_color_manual(values = c('Import (Including Crude Oil)' = 'blue', 'Import (Excluding Crude Oil)' = 'blue', 'Export' = 'red'),
+                     name = "Type",
+                     breaks = c('Import (Including Crude Oil)', 'Import (Excluding Crude Oil)', 'Export'),
+                     labels = c('Import (Including Crude Oil)', 'Import (Excluding Crude Oil)', 'Export')) +
+  scale_linetype_manual(values = c('Import (Including Crude Oil)' = "solid", 'Import (Excluding Crude Oil)' = "dashed", 'Export' = "solid"),
+                        name = "Type",
+                        breaks = c('Import (Including Crude Oil)', 'Import (Excluding Crude Oil)', 'Export'),
+                        labels = c('Import (Including Crude Oil)', 'Import (Excluding Crude Oil)', 'Export')) +
+  scale_x_continuous(breaks = seq(min(import_data$year), max(import_data$year), by = 1)) +
+  scale_y_continuous(n.breaks = 20) +
+  labs(title = "Comparison of Imports (with and without Crude Oil) and Exports Over the Years",
+       x = "Year",
+       y = "Total Quantity") +
+  theme_bw() +
+  theme(legend.title = element_blank(),
+        legend.position = c(0.9, 0.5),
+        legend.justification = c(0.5, 0.5),
+        legend.background = element_rect(fill="white",
+                                  size=0.5, linetype="solid", 
+                                  colour ="black"))
+
+plot(plt)
+```
+
+```{R}
+fig <- plot_ly() %>%
+      add_trace(data = import_data, x = ~year, y = ~total, name = 'Import (Including Crude Oil)', type = 'scatter', mode = 'lines+markers', line = list(color = 'blue')) %>%
+      add_trace(data = import_data_no_crude, x = ~year, y = ~total, name = 'Import (Excluding Crude Oil)', type = 'scatter', mode = 'lines+markers', line = list(color = 'blue', dash = 'dash')) %>%
+      add_trace(data = export_data, x = ~year, y = ~total, name = 'Export', type = 'scatter', mode = 'lines+markers', line = list(color = 'red')) %>%
+      layout(title = "Comparison of Imports (with and without Crude Oil) and Exports Over the Years",
+             xaxis = list(title = "Year"),
+             yaxis = list(title = "Total Quantity in '000 Metric Tons"))
+
+fig
+
+```
+
+```{R}
+
+data_subset <- import_data
+
+data_subset <- data_subset %>%
+      filter(year == 1999) %>%
+      select(-year, -import_export, -total) %>%
+      gather(key = "Product", value = "Quantity")
+
+data_subset
+```
+```{R}
+plot_ly(data_subset, labels = ~Product, values = ~Quantity, type = 'pie') %>%
+      layout(title = paste("Product Composition in", 1999))
+```
+
+```{R}
+sun <- read.csv(here("Data","import_export_months.csv"))
+sun
+```
+
+```{R}
+sun_import <- subset(sun, import_export == "import")
+
+sun_export <- subset(sun, import_export == "export")
+
+sun_import <- sun_import %>%
+  select(-total)
+
+t1 <- pivot_longer(sun_import, cols = c(crude_oil:others), names_to = "Product", values_to = "Quantity")
+
+sun_export <- sun_export %>%
+  select(-total)
+
+t2 <- pivot_longer(sun_export, cols = c(crude_oil:others), names_to = "Product", values_to = "Quantity")
+
+t1
+
+t2
+```
+
+```{R}
+dout <- data_to_hierarchical(t1, c(year, Product, months), Quantity)
+
+hchart(dout, type="sunburst")
+
+```
+
+```{R}
+dout <- data_to_hierarchical(t2, c(year, Product, months), Quantity)
+
+hchart(dout, type="sunburst")
+
+```
+
+```{R}
+library(sf)
+library(leaflet)
+library(dplyr)
+
+# Read in the shapefile and preprocess it
+sts <- st_read(here("Data/India Shape", "Admin2.shp")) %>%
+  mutate(Name = str_to_lower(ST_NM))
+
+# Read in the sales data and preprocess it
+MS_trial <- read.csv(here("Data","MS_Sales.csv"))
+
+MS_trial$States[MS_trial$States == "dadra & nagar haveli and daman & diu"] <- "dadra and nagar haveli and daman and diu"
+
+MS_trial <- MS_trial %>%
+  mutate(Name = str_to_lower(States))
+
+# Join the two data frames together
+states_ms <- left_join(sts, MS_trial, by = "Name")
+
+states_ms <- states_ms %>%
+  rename_at(vars(starts_with("X")), ~ substr(., 2, nchar(.)))
+
+states_ms <-  pivot_longer(states_ms, cols = c("2008":"2022"), names_to = "Years", values_to = "Quantities")
+
+# Create the map
+leaflet(states_ms) %>%
+  setView(lng = 78.9629, lat = 20.5937, zoom = 4) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    fillColor = ~colorNumeric("YlOrRd", 2022)(2022),
+    weight = 1,
+    opacity = 1,
+    color = "black",
+    dashArray = "1",
+    fillOpacity = 0.9,
+    highlight = highlightOptions(
+      weight = 2,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.9,
+      bringToFront = TRUE),
+    label = ~paste(Name, ": ", 2022)
+  ) %>%
+   addLegend(pal = colorNumeric("YlOrRd", 2022), values = ~2022, opacity = 0.9)
+
+```
+
+```{R}
+states_ms <-  pivot_longer(states_ms, cols = c("2008":"2022"), names_to = "Years", values_to = "Quantities")
+```
+
+```{R}
+my_df <- read.csv(here("Data","Production_consumption.csv"))
+
+my_df$Year <- as.numeric(my_df$Year)
+
+# Create the base plot
+p <- ggplot(my_df, aes(x = Products, y = Production_Quantity, size = Consumption_Quantity)) +
+  geom_point(aes(color = Consumption_Quantity), alpha = 0.7) +
+  scale_size(range = c(1, 15)) +
+  theme_minimal()+
+  theme(text = element_text(size = 20), 
+        axis.text.x = element_text(angle = 0, hjust = 1)) +
+  labs(title = "Bubble Chart: Year {floor(frame_time)}", x = "Product", y = "Total Production") +
+  transition_time(Year) +
+  ease_aes('linear')
+
+animation <- animate(p, fps = 10, duration = 30, height = 600, width = 1200, renderer = gifski_renderer("bubble.gif"))
+```
+
+```{R}
+any(!is.finite(my_df$Year))
+class(my_df$Year)
+```
+
+```{R}
+ms <- read.csv(here("Data","MS_Sales.csv"))
+
+ms_sales <- ms %>% select(c("X2008":"X2022"))
+
+ms_sales <- ms_sales %>%
+    rename_at(vars(starts_with("X")), ~ substr(., 2, nchar(.)))
+
+ms_sales <- pivot_longer(ms_sales, cols = c("2008":"2022"), names_to = "Year", values_to = "Quantity")
+
+ms_sales <- ms_sales %>%
+  group_by(Year) %>%
+  summarise(Total_Quantity = sum(Quantity),
+            .groups = "drop")
+
+ms_sales <- ms_sales %>% as.data.frame()
+```
+
+```{R}
+ms_sales
+```
